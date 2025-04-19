@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -11,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 import { scrapeJobDescription, ScrapedJobData } from '@/utils/jobScraper';
 import { generateCoverLetter } from '@/utils/coverLetterGenerator';
 import { copyToClipboard, downloadAsPDF } from '@/utils/exportUtils';
@@ -51,8 +50,7 @@ const CoverLetterGenerator = () => {
 
   const handleScrapeJob = async () => {
     if (!jobUrl) {
-      toast({
-        title: "Error",
+      toast("Error", {
         description: "Please enter a job URL",
         variant: "destructive",
       });
@@ -64,8 +62,7 @@ const CoverLetterGenerator = () => {
       const jobData = await scrapeJobDescription(jobUrl);
       if (jobData) {
         setScrapedJobData(jobData);
-        toast({
-          title: "Success",
+        toast("Success", {
           description: "Job description scraped successfully!",
         });
       }
@@ -78,8 +75,7 @@ const CoverLetterGenerator = () => {
 
   const handleGenerate = async () => {
     if (!jobUrl || !selectedResume || selectedStyles.length === 0 || !scrapedJobData) {
-      toast({
-        title: "Error",
+      toast("Error", {
         description: "Please fill in all required fields and scrape the job description",
         variant: "destructive",
       });
@@ -96,14 +92,12 @@ const CoverLetterGenerator = () => {
       
       setGeneratedLetter(letter);
       setActiveTab("result");
-      toast({
-        title: "Success",
+      toast("Success", {
         description: "Cover letter generated successfully!",
       });
     } catch (error) {
       console.error('Error generating letter:', error);
-      toast({
-        title: "Error",
+      toast("Error", {
         description: "Failed to generate cover letter",
         variant: "destructive",
       });

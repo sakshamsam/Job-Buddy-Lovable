@@ -1,5 +1,5 @@
 
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 export interface ScrapedJobData {
   title: string;
@@ -43,8 +43,7 @@ Benefits:
     return mockJobData;
   } catch (error) {
     console.error('Error scraping job description:', error);
-    toast({
-      title: "Error",
+    toast("Error", {
       description: "Failed to scrape job description. Please check the URL and try again.",
       variant: "destructive",
     });
