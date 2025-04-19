@@ -2,13 +2,14 @@
 import React, { useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const writingStyles = [
@@ -28,14 +29,32 @@ const resumes = [
 const CoverLetterGenerator = () => {
   const [activeTab, setActiveTab] = useState("input");
   const [jobUrl, setJobUrl] = useState("");
-  const [jobDescription, setJobDescription] = useState("");
+  const [jobDescription, setJobDescription] = useState(""); // Will be populated from scraping
   const [selectedResume, setSelectedResume] = useState("");
-  const [selectedStyle, setSelectedStyle] = useState("formal");
+  const [selectedStyles, setSelectedStyles] = useState<string[]>(["formal"]);
   const [generatedLetter, setGeneratedLetter] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleGenerate = () => {
-    // In a real app, this would call an API to generate the letter
-    setGeneratedLetter(`Dear Hiring Manager,
+  const handleStyleToggle = (styleId: string) => {
+    setSelectedStyles(current =>
+      current.includes(styleId)
+        ? current.filter(id => id !== styleId)
+        : [...current, styleId]
+    );
+  };
+
+  const handleGenerate = async () => {
+    if (!jobUrl || !selectedResume || selectedStyles.length === 0) {
+      return;
+    }
+
+    setIsLoading(true);
+    // In a real app, this would call an API to scrape the job description and generate the letter
+    try {
+      // Simulate scraping and generation delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      setGeneratedLetter(`Dear Hiring Manager,
 
 I am writing to express my interest in the Software Engineer position at Acme Corporation. With over 5 years of experience in full-stack development and a proven track record of delivering robust applications, I believe I am well-positioned to contribute to your team's success.
 
@@ -45,8 +64,13 @@ I am excited about the opportunity to bring my technical expertise and problem-s
 
 Sincerely,
 Jordan Smith`);
-    
-    setActiveTab("result");
+      
+      setActiveTab("result");
+    } catch (error) {
+      console.error('Error generating letter:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -75,25 +99,18 @@ Jordan Smith`);
                 
                 <TabsContent value="input" className="mt-0 space-y-6">
                   <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="jobUrl">Job Posting URL (optional)</Label>
-                      <Input 
-                        id="jobUrl" 
-                        placeholder="https://example.com/job-posting" 
-                        value={jobUrl}
-                        onChange={(e) => setJobUrl(e.target.value)}
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="jobDescription">Job Description</Label>
-                      <Textarea 
-                        id="jobDescription" 
-                        placeholder="Paste the job description here..." 
-                        className="min-h-32" 
-                        value={jobDescription}
-                        onChange={(e) => setJobDescription(e.target.value)}
-                      />
+                    <div className="relative">
+                      <Label htmlFor="jobUrl">Job Posting URL</Label>
+                      <div className="relative">
+                        <Input 
+                          id="jobUrl" 
+                          placeholder="https://example.com/job-posting" 
+                          value={jobUrl}
+                          onChange={(e) => setJobUrl(e.target.value)}
+                          className="pl-10"
+                        />
+                        <Link2 className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+                      </div>
                     </div>
                     
                     <div>
@@ -113,16 +130,17 @@ Jordan Smith`);
                     </div>
                     
                     <div className="space-y-3">
-                      <Label>Writing Style</Label>
-                      <RadioGroup 
-                        value={selectedStyle} 
-                        onValueChange={setSelectedStyle}
-                        className="grid grid-cols-1 md:grid-cols-2 gap-4"
-                      >
+                      <Label>Writing Styles (Select multiple)</Label>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {writingStyles.map((style) => (
                           <div key={style.id} className="flex items-start space-x-2">
-                            <RadioGroupItem value={style.id} id={style.id} className="mt-1" />
-                            <div className="grid gap-1">
+                            <Checkbox
+                              id={style.id}
+                              checked={selectedStyles.includes(style.id)}
+                              onCheckedChange={() => handleStyleToggle(style.id)}
+                              className="mt-1"
+                            />
+                            <div className="grid gap-1.5">
                               <Label htmlFor={style.id} className="font-medium">
                                 {style.label}
                               </Label>
@@ -132,15 +150,15 @@ Jordan Smith`);
                             </div>
                           </div>
                         ))}
-                      </RadioGroup>
+                      </div>
                     </div>
                     
                     <Button 
                       onClick={handleGenerate} 
                       className="w-full mt-6"
-                      disabled={!jobDescription || !selectedResume}
+                      disabled={!jobUrl || !selectedResume || selectedStyles.length === 0 || isLoading}
                     >
-                      Generate Cover Letter
+                      {isLoading ? "Generating..." : "Generate Cover Letter"}
                     </Button>
                   </div>
                 </TabsContent>
@@ -171,3 +189,4 @@ Jordan Smith`);
 };
 
 export default CoverLetterGenerator;
+
