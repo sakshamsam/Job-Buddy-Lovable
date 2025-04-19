@@ -11,7 +11,7 @@ const Header = () => {
         <div className="flex items-center gap-2">
           <Link to="/" className="flex items-center gap-2">
             <FileCheck className="h-6 w-6 text-purple-primary" />
-            <h1 className="text-xl font-semibold tracking-tight">Cover Letter Genius</h1>
+            <h1 className="text-xl font-semibold tracking-tight">Job Buddy</h1>
           </Link>
         </div>
         
