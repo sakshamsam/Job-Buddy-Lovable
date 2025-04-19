@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Link2 } from "lucide-react";
@@ -11,6 +11,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "@/components/ui/sonner";
+import { scrapeJobDescription, ScrapedJobData } from '@/utils/jobScraper';
+import { generateCoverLetter } from '@/utils/coverLetterGenerator';
+import { copyToClipboard, downloadAsPDF } from '@/utils/exportUtils';
 
 const writingStyles = [
   { id: "formal", label: "Formal", description: "Professional and straightforward, ideal for traditional companies." },
@@ -29,11 +33,13 @@ const resumes = [
 const CoverLetterGenerator = () => {
   const [activeTab, setActiveTab] = useState("input");
   const [jobUrl, setJobUrl] = useState("");
-  const [jobDescription, setJobDescription] = useState(""); // Will be populated from scraping
+  const [scrapedJobData, setScrapedJobData] = useState<ScrapedJobData | null>(null);
   const [selectedResume, setSelectedResume] = useState("");
   const [selectedStyles, setSelectedStyles] = useState<string[]>(["formal"]);
   const [generatedLetter, setGeneratedLetter] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isScraping, setIsScraping] = useState(false);
+  const letterRef = useRef<HTMLDivElement>(null);
 
   const handleStyleToggle = (styleId: string) => {
     setSelectedStyles(current =>
@@ -43,34 +49,79 @@ const CoverLetterGenerator = () => {
     );
   };
 
+  const handleScrapeJob = async () => {
+    if (!jobUrl) {
+      toast({
+        title: "Error",
+        description: "Please enter a job URL",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsScraping(true);
+    try {
+      const jobData = await scrapeJobDescription(jobUrl);
+      if (jobData) {
+        setScrapedJobData(jobData);
+        toast({
+          title: "Success",
+          description: "Job description scraped successfully!",
+        });
+      }
+    } catch (error) {
+      console.error('Error scraping job:', error);
+    } finally {
+      setIsScraping(false);
+    }
+  };
+
   const handleGenerate = async () => {
-    if (!jobUrl || !selectedResume || selectedStyles.length === 0) {
+    if (!jobUrl || !selectedResume || selectedStyles.length === 0 || !scrapedJobData) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields and scrape the job description",
+        variant: "destructive",
+      });
       return;
     }
 
     setIsLoading(true);
-    // In a real app, this would call an API to scrape the job description and generate the letter
     try {
-      // Simulate scraping and generation delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const letter = await generateCoverLetter({
+        jobData: scrapedJobData,
+        resumeId: selectedResume,
+        writingStyles: selectedStyles,
+      });
       
-      setGeneratedLetter(`Dear Hiring Manager,
-
-I am writing to express my interest in the Software Engineer position at Acme Corporation. With over 5 years of experience in full-stack development and a proven track record of delivering robust applications, I believe I am well-positioned to contribute to your team's success.
-
-My experience with React, Node.js, and cloud infrastructure aligns perfectly with your requirements. In my current role at Tech Solutions Inc., I reduced application load time by 40% and implemented CI/CD pipelines that decreased deployment time by 25%.
-
-I am excited about the opportunity to bring my technical expertise and problem-solving skills to Acme Corporation and help drive your digital transformation initiatives.
-
-Sincerely,
-Jordan Smith`);
-      
+      setGeneratedLetter(letter);
       setActiveTab("result");
+      toast({
+        title: "Success",
+        description: "Cover letter generated successfully!",
+      });
     } catch (error) {
       console.error('Error generating letter:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate cover letter",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleCopyToClipboard = () => {
+    copyToClipboard(generatedLetter);
+  };
+
+  const handleDownloadPDF = () => {
+    downloadAsPDF('cover-letter-content', `CoverLetter-${scrapedJobData?.company || 'Company'}`);
+  };
+
+  const handleEditLetter = () => {
+    setActiveTab("input");
   };
 
   return (
@@ -111,6 +162,23 @@ Jordan Smith`);
                         />
                         <Link2 className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
                       </div>
+                      <Button 
+                        onClick={handleScrapeJob} 
+                        className="mt-2" 
+                        variant="outline"
+                        disabled={!jobUrl || isScraping}
+                      >
+                        {isScraping ? "Scraping..." : "Scrape Job Details"}
+                      </Button>
+                      
+                      {scrapedJobData && (
+                        <div className="mt-4 p-4 bg-green-50 rounded-md border border-green-200">
+                          <p className="text-sm font-medium text-green-800">Job Details Retrieved:</p>
+                          <p className="text-sm mt-1"><span className="font-medium">Title:</span> {scrapedJobData.title}</p>
+                          <p className="text-sm mt-1"><span className="font-medium">Company:</span> {scrapedJobData.company}</p>
+                          <p className="text-sm mt-1"><span className="font-medium">Location:</span> {scrapedJobData.location}</p>
+                        </div>
+                      )}
                     </div>
                     
                     <div>
@@ -156,7 +224,7 @@ Jordan Smith`);
                     <Button 
                       onClick={handleGenerate} 
                       className="w-full mt-6"
-                      disabled={!jobUrl || !selectedResume || selectedStyles.length === 0 || isLoading}
+                      disabled={!jobUrl || !selectedResume || selectedStyles.length === 0 || isLoading || !scrapedJobData}
                     >
                       {isLoading ? "Generating..." : "Generate Cover Letter"}
                     </Button>
@@ -165,16 +233,22 @@ Jordan Smith`);
                 
                 <TabsContent value="result" className="mt-0">
                   <div className="space-y-6">
-                    <div className="bg-white border rounded-md p-6">
+                    <div className="bg-white border rounded-md p-6" id="cover-letter-content" ref={letterRef}>
                       <div className="whitespace-pre-line font-serif leading-relaxed">
                         {generatedLetter}
                       </div>
                     </div>
                     
                     <div className="flex flex-col sm:flex-row gap-4 justify-end">
-                      <Button variant="outline">Copy to Clipboard</Button>
-                      <Button variant="outline">Download as PDF</Button>
-                      <Button variant="outline">Edit Letter</Button>
+                      <Button variant="outline" onClick={handleCopyToClipboard}>
+                        Copy to Clipboard
+                      </Button>
+                      <Button variant="outline" onClick={handleDownloadPDF}>
+                        Download as PDF
+                      </Button>
+                      <Button variant="outline" onClick={handleEditLetter}>
+                        Edit Letter
+                      </Button>
                     </div>
                   </div>
                 </TabsContent>
@@ -189,4 +263,3 @@ Jordan Smith`);
 };
 
 export default CoverLetterGenerator;
-
