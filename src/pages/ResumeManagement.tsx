@@ -88,7 +88,8 @@ const ResumeManagement = () => {
                       <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Categories</SelectItem>
+                      {/* Fix: Changed empty string value to "all" */}
+                      <SelectItem value="all">All Categories</SelectItem>
                       {categories.map((category) => (
                         <SelectItem key={category.id} value={category.id}>
                           {category.name}
@@ -119,7 +120,8 @@ const ResumeManagement = () => {
                   </CardContent>
                 </Card>
                 
-                {filteredResumes.map((resume) => (
+                {/* Update the filter logic to work with the new "all" value */}
+                {(selectedCategory === "all" ? resumes : filteredResumes).map((resume) => (
                   <Card key={resume.id} className="hover-glow">
                     <CardHeader className="pb-3">
                       <div className="flex justify-between items-start">
