@@ -5,26 +5,18 @@ import { toast } from "sonner";
 export const copyToClipboard = (text: string): void => {
   navigator.clipboard.writeText(text)
     .then(() => {
-      toast("Success", {
-        description: "Cover letter copied to clipboard!",
-      });
+      toast.success("Cover letter copied to clipboard!");
     })
     .catch(err => {
       console.error('Failed to copy text: ', err);
-      toast("Error", {
-        description: "Failed to copy to clipboard",
-        variant: "destructive",
-      });
+      toast.error("Failed to copy to clipboard");
     });
 };
 
 export const downloadAsPDF = (elementId: string, filename: string): void => {
   const element = document.getElementById(elementId);
   if (!element) {
-    toast("Error", {
-      description: "Could not find content to download",
-      variant: "destructive",
-    });
+    toast.error("Could not find content to download");
     return;
   }
 
@@ -36,21 +28,14 @@ export const downloadAsPDF = (elementId: string, filename: string): void => {
     jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
   };
 
-  toast("Processing", {
-    description: "Preparing your PDF for download...",
-  });
+  toast("Preparing your PDF for download...");
 
   html2pdf().set(opt).from(element).save()
     .then(() => {
-      toast("Success", {
-        description: "Cover letter downloaded successfully!",
-      });
+      toast.success("Cover letter downloaded successfully!");
     })
     .catch(err => {
       console.error('Failed to generate PDF: ', err);
-      toast("Error", {
-        description: "Failed to download as PDF",
-        variant: "destructive",
-      });
+      toast.error("Failed to download as PDF");
     });
 };

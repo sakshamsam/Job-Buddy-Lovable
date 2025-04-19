@@ -50,10 +50,7 @@ const CoverLetterGenerator = () => {
 
   const handleScrapeJob = async () => {
     if (!jobUrl) {
-      toast("Error", {
-        description: "Please enter a job URL",
-        variant: "destructive",
-      });
+      toast.error("Please enter a job URL");
       return;
     }
 
@@ -62,9 +59,7 @@ const CoverLetterGenerator = () => {
       const jobData = await scrapeJobDescription(jobUrl);
       if (jobData) {
         setScrapedJobData(jobData);
-        toast("Success", {
-          description: "Job description scraped successfully!",
-        });
+        toast.success("Job description scraped successfully!");
       }
     } catch (error) {
       console.error('Error scraping job:', error);
@@ -75,10 +70,7 @@ const CoverLetterGenerator = () => {
 
   const handleGenerate = async () => {
     if (!jobUrl || !selectedResume || selectedStyles.length === 0 || !scrapedJobData) {
-      toast("Error", {
-        description: "Please fill in all required fields and scrape the job description",
-        variant: "destructive",
-      });
+      toast.error("Please fill in all required fields and scrape the job description");
       return;
     }
 
@@ -92,15 +84,10 @@ const CoverLetterGenerator = () => {
       
       setGeneratedLetter(letter);
       setActiveTab("result");
-      toast("Success", {
-        description: "Cover letter generated successfully!",
-      });
+      toast.success("Cover letter generated successfully!");
     } catch (error) {
       console.error('Error generating letter:', error);
-      toast("Error", {
-        description: "Failed to generate cover letter",
-        variant: "destructive",
-      });
+      toast.error("Failed to generate cover letter");
     } finally {
       setIsLoading(false);
     }

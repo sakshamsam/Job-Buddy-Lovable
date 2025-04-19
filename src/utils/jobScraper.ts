@@ -43,10 +43,7 @@ Benefits:
     return mockJobData;
   } catch (error) {
     console.error('Error scraping job description:', error);
-    toast("Error", {
-      description: "Failed to scrape job description. Please check the URL and try again.",
-      variant: "destructive",
-    });
+    toast.error("Failed to scrape job description. Please check the URL and try again.");
     return null;
   }
 };
