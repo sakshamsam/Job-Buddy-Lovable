@@ -1,12 +1,13 @@
 # Welcome to your Lovable project
 
-✨** Overview**
+✨**Overview**
 CoverPro is a powerful web application that transforms the job application process by automating two of the most time-consuming tasks job seekers face: writing personalized cover letters and researching prospective employers.
 With just a job posting URL and your resume, CoverPro leverages advanced AI to generate tailored cover letters that align with your experience and the job requirements. It also produces insightful market research reports that give you a competitive edge in interviews.
 
 **Built by job seekers, for job seekers.**
 
-🎯 **Value Proposition**
+# 🎯 **Value Proposition**
+
 **Why CoverPro?**
 Job hunting is exhausting. The average active job seeker:
 
@@ -17,7 +18,7 @@ Lacks time for proper company research
 
 CoverPro reduces the application process from hours to minutes, letting you focus on interviews and networking instead of repetitive writing tasks.
 
-🚀**Features**
+# 🚀**Features**
 🔐 **User Profile Management**
 
 Secure email and password authentication
