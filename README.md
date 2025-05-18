@@ -1,4 +1,4 @@
-# Welcome to your Lovable project
+# Job Buddy
 
 ✨**Overview**
 CoverPro is a powerful web application that transforms the job application process by automating two of the most time-consuming tasks job seekers face: writing personalized cover letters and researching prospective employers.
